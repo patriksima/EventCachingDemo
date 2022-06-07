@@ -1,0 +1,46 @@
+﻿@page "/SalesLogs"
+@using EventCachingDemo.Shared.Queries
+@inject HttpClient Http
+
+<h3>Sales Logs</h3>
+
+
+@if (salesLogs == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Agent</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Total</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var salesLog in salesLogs)
+        {
+            <tr>
+                <td>@salesLog.DayOfSale.ToLocalTime()</td>
+                <td>@salesLog.SalesAgent</td>
+                <td>@salesLog.Product</td>
+                <td>@salesLog.Quantity</td>
+                <td>@salesLog.Price</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private SalesLogDto[]? salesLogs;
+
+    protected override async Task OnInitializedAsync()
+    {
+        salesLogs = await Http.GetFromJsonAsync<SalesLogDto[]>("SalesLogs");
+    }
+}
