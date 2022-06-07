@@ -4,13 +4,27 @@
 
 <h3>Sales Logs</h3>
 
-
 @if (salesLogs == null)
 {
-    <p><em>Loading...</em></p>
+    <p>
+        <em>Loading...</em>
+    </p>
 }
 else
 {
+    <form>
+        <label>
+            Agent:
+            <select @bind="@salesAgentId">
+                <option value=""></option>
+                @foreach (var agent in salesAgents)
+                {
+                    <option value="@agent.SalesAgentId">@agent.FullName</option>
+                }
+            </select>
+        </label>
+    </form>
+
     <table class="table">
         <thead>
         <tr>
@@ -37,10 +51,15 @@ else
 }
 
 @code {
+    private Guid salesAgentId;
+    private SalesAgentDto[] salesAgents;
+
     private SalesLogDto[]? salesLogs;
 
     protected override async Task OnInitializedAsync()
     {
         salesLogs = await Http.GetFromJsonAsync<SalesLogDto[]>("SalesLogs");
+        salesAgents = await Http.GetFromJsonAsync<SalesAgentDto[]>("SalesLogs/Agents");
     }
+
 }

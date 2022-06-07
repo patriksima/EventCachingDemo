@@ -16,8 +16,16 @@ public class SalesLogsController : ControllerBase
     }
 
     [HttpGet]
+    [Route("")]
     public async Task<IEnumerable<SalesLogDto>> Get()
     {
         return await _mediator.Send(new SalesLogQuery());
+    }
+    
+    [HttpGet]
+    [Route("Agents")]
+    public async Task<IEnumerable<SalesAgentDto>> Agents()
+    {
+        return await _mediator.Send(new SalesAgentsQuery());
     }
 }
