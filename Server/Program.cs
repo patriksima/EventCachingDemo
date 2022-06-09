@@ -1,5 +1,6 @@
 using System.Reflection;
 using EventCachingDemo.Server;
+using EventCachingDemo.Server.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +20,13 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<MyContext>((provider, optionsBuilder) =>
 {
     optionsBuilder.UseSqlServer(connectionString);
+});
+
+// Add services to the container.
+builder.Services.AddControllersWithViews(options =>
+{
+    // converts QueryContainer to Query and pass further
+    options.ModelBinderProviders.Insert(0, new MessageBinderProvider());
 });
 
 // Build app

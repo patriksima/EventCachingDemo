@@ -4,7 +4,7 @@
 
 <h3>Sales Logs</h3>
 
-@if (salesLogs == null)
+@if (_salesLogs == null)
 {
     <p>
         <em>Loading...</em>
@@ -15,9 +15,9 @@ else
     <form>
         <label>
             Agent:
-            <select @bind="@salesAgentId">
+            <select @bind="@_salesAgentId">
                 <option value=""></option>
-                @foreach (var agent in salesAgents)
+                @foreach (var agent in _salesAgents!)
                 {
                     <option value="@agent.SalesAgentId">@agent.FullName</option>
                 }
@@ -36,7 +36,7 @@ else
         </tr>
         </thead>
         <tbody>
-        @foreach (var salesLog in salesLogs)
+        @foreach (var salesLog in _salesLogs)
         {
             <tr>
                 <td>@salesLog.DayOfSale.ToLocalTime()</td>
@@ -51,15 +51,14 @@ else
 }
 
 @code {
-    private Guid salesAgentId;
-    private SalesAgentDto[] salesAgents;
-
-    private SalesLogDto[]? salesLogs;
+    private Guid _salesAgentId;
+    private IList<SalesAgentDto>? _salesAgents;
+    private IList<SalesLogDto>? _salesLogs;
 
     protected override async Task OnInitializedAsync()
     {
-        salesLogs = await Http.GetFromJsonAsync<SalesLogDto[]>("SalesLogs");
-        salesAgents = await Http.GetFromJsonAsync<SalesAgentDto[]>("SalesLogs/Agents");
+        _salesLogs = await HttpClient.SendAsync(new SalesLogQuery());
+        _salesAgents = await HttpClient.SendAsync(new SalesAgentsQuery());
     }
 
 }
