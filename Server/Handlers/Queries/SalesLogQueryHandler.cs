@@ -25,6 +25,7 @@ public class SalesLogQueryHandler : IRequestHandler<SalesLogQuery, IList<SalesLo
                 SalesAgent = e.SalesAgent.FirstName + " " + e.SalesAgent.LastName,
                 Product = e.Product.Name
             })
+            .OrderByDescending(e => e.DayOfSale)
             .ToListAsync(cancellationToken: cancellationToken);
     }
 }
