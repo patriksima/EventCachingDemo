@@ -1,0 +1,88 @@
+﻿@page "/Products"
+@using Microsoft.AspNetCore.Components
+@using EventCachingDemo.Shared.Queries
+@using EventCachingDemo.Shared.Commands
+<h3>Products</h3>
+
+@if (_products is null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <EditForm Model="@_model" OnValidSubmit="@HandleValidSubmit">
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
+        <label>
+            Name:
+            <InputText @bind-Value="@_model.Name"/>
+        </label>
+        <label>
+            Description:
+            <InputText @bind-Value="@_model.Description"/>
+        </label>
+        <label>
+            Price:
+            <InputNumber @bind-Value="@_model.Price"/>
+        </label>
+        <button type="submit">Add product</button>
+    </EditForm>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Price</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var product in _products)
+        {
+            <tr>
+                <td>@product.Name</td>
+                <td>@product.Description</td>
+                <td>@product.Price</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IList<ProductDto>? _products;
+
+    private readonly AddProductCommand _model = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProducts();
+    }
+
+    private async Task LoadProducts()
+    {
+        _products = await HttpClient.SendAsync(new ProductsQuery());
+    }
+
+
+    private void ResetModel()
+    {
+        _model.Name = string.Empty;
+        _model.Description = string.Empty;
+        _model.Price = 0;
+    }
+
+    private async Task HandleValidSubmit(EditContext arg)
+    {
+        await HttpClient.SendAsync(_model);
+
+        await LoadProducts();
+
+        ResetModel();
+
+        StateHasChanged();
+    }
+
+}

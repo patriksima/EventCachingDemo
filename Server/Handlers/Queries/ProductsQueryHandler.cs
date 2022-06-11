@@ -21,6 +21,7 @@ public class ProductsQueryHandler : IRequestHandler<ProductsQuery, IList<Product
             {
                 ProductId = e.ProductId,
                 Name = e.Name,
+                Description = e.Description,
                 Price = e.Price
             })
             .AsNoTracking()
