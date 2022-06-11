@@ -21,8 +21,10 @@ public class SalesAgentsQueryHandler : IRequestHandler<SalesAgentsQuery, IList<S
             {
                 SalesAgentId = e.SalesAgentId,
                 FirstName = e.FirstName,
-                LastName = e.LastName
+                LastName = e.LastName,
+                Department = e.SalesDepartment.Name
             })
+            .AsNoTracking()
             .OrderBy(e => e.LastName)
             .ThenBy(e => e.FirstName)
             .ToListAsync(cancellationToken: cancellationToken);

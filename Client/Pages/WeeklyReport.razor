@@ -1,0 +1,49 @@
+﻿@page "/WeeklyReport"
+@using EventCachingDemo.Shared.Queries
+
+<h3>Weekly Report</h3>
+
+@if (_reports == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Year</th>
+            <th>Week</th>
+            <th>Agent</th>
+            <th>TotalProducts</th>
+            <th>TotalPrice</th>
+            <th>MostSoldProduct</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var report in _reports)
+        {
+            <tr>
+                <td>@report.Year</td>
+                <td>@report.Week</td>
+                <td>@report.Agent</td>
+                <td>@report.TotalProducts</td>
+                <td>@report.TotalPrice</td>
+                <td>@report.MostSoldProduct</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        _reports = await HttpClient.SendAsync(new WeeklyReportQuery());
+    }
+
+    private IList<ReportDto>? _reports;
+}

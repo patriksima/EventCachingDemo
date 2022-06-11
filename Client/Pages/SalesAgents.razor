@@ -1,0 +1,101 @@
+﻿@page "/SalesAgents"
+@using EventCachingDemo.Shared.Queries
+@using EventCachingDemo.Shared.Helpers
+@using EventCachingDemo.Shared.Commands
+
+<h3>Sales Agents</h3>
+
+@if (_departments is null || _agents is null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <EditForm Model="@_model" OnValidSubmit="@HandleValidSubmit">
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
+        <label>
+            First Name:
+            <InputText @bind-Value="@_model.FirstName"/>
+        </label>
+        <label>
+            Last Name:
+            <InputText @bind-Value="@_model.LastName"/>
+        </label>
+        <label>
+            Department:
+            <InputSelect @bind-Value="@_model.SalesDepartmentId">
+                <option value="">--choose department--</option>
+                @foreach (var department in _departments)
+                {
+                    <option value="@department.SalesDepartmentId">@department.Name</option>
+                }
+            </InputSelect>
+        </label>
+        <button type="submit">Add Agent</button>
+    </EditForm>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Department</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var agent in _agents)
+        {
+            <tr>
+                <td>@agent.FirstName</td>
+                <td>@agent.LastName</td>
+                <td>@agent.Department</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IList<SalesDepartmentDto>? _departments;
+    private IList<SalesAgentDto>? _agents;
+
+    private readonly AddSalesAgentCommand _model = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSalesDepartments();
+        await LoadSalesAgents();
+    }
+
+    private async Task LoadSalesDepartments()
+    {
+        _departments = await HttpClient.SendAsync(new SalesDepartmentsQuery());
+    }
+
+    private async Task LoadSalesAgents()
+    {
+        _agents = await HttpClient.SendAsync(new SalesAgentsQuery());
+    }
+
+    private void ResetModel()
+    {
+        _model.FirstName = string.Empty;
+        _model.LastName = string.Empty;
+        _model.SalesDepartmentId = Guid.Empty;
+    }
+
+    private async Task HandleValidSubmit(EditContext arg)
+    {
+        await HttpClient.SendAsync(_model);
+
+        await LoadSalesAgents();
+
+        ResetModel();
+
+        StateHasChanged();
+    }
+
+}

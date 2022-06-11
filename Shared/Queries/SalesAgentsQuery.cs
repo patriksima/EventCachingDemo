@@ -13,4 +13,5 @@ public record SalesAgentDto
     public string FirstName { get; init; } = default!;
     public string LastName { get; init; } = default!;
     public string FullName => FirstName + " " + LastName;
+    public string Department { get; init; } = default!;
 }

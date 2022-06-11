@@ -1,0 +1,90 @@
+﻿@page "/SalesDepartments"
+@using EventCachingDemo.Shared.Queries
+@using EventCachingDemo.Shared.Helpers
+@using EventCachingDemo.Shared.Commands
+
+<h3>Sales Departments</h3>
+
+@if (_departments is null || _salesAgents is null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <EditForm Model="@_model" OnValidSubmit="@HandleValidSubmit">
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
+        <label>
+            Name:
+            <InputText @bind-Value="@_model.Name"/>
+        </label>
+        <label>
+            Description:
+            <InputText @bind-Value="@_model.Description"/>
+        </label>
+        <button type="submit">Add Department</button>
+    </EditForm>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Agents</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var department in _departments)
+        {
+            <tr>
+                <td>@department.Name</td>
+                <td>@department.Description.Truncate(50)</td>
+                <td>@string.Join(",", department.SalesAgents)</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IList<SalesDepartmentDto>? _departments;
+    private IList<SalesAgentDto>? _salesAgents;
+
+    private readonly AddSalesDepartmentCommand _model = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSalesDepartments();
+        await LoadSalesAgents();
+    }
+
+    private async Task LoadSalesDepartments()
+    {
+        _departments = await HttpClient.SendAsync(new SalesDepartmentsQuery());
+    }
+
+    private async Task LoadSalesAgents()
+    {
+        _salesAgents = await HttpClient.SendAsync(new SalesAgentsQuery());
+    }
+
+    private void ResetModel()
+    {
+        _model.Name = string.Empty;
+        _model.Description = string.Empty;
+    }
+
+    private async Task HandleValidSubmit(EditContext arg)
+    {
+        await HttpClient.SendAsync(_model);
+
+        await LoadSalesDepartments();
+
+        ResetModel();
+
+        StateHasChanged();
+    }
+
+}

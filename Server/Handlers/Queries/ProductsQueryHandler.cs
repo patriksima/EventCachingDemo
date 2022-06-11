@@ -23,6 +23,7 @@ public class ProductsQueryHandler : IRequestHandler<ProductsQuery, IList<Product
                 Name = e.Name,
                 Price = e.Price
             })
+            .AsNoTracking()
             .OrderBy(e => e.Name)
             .ToListAsync(cancellationToken: cancellationToken);
     }
