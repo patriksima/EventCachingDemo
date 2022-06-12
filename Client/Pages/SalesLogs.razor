@@ -1,6 +1,7 @@
 ﻿@page "/SalesLogs"
 @using EventCachingDemo.Shared.Queries
 @using EventCachingDemo.Shared.Commands
+@using EventCachingDemo.Shared.Helpers
 
 <h3>Sales Logs</h3>
 
@@ -54,6 +55,7 @@ else
         <thead>
         <tr>
             <th>Date</th>
+            <th>Week</th>
             <th>Agent</th>
             <th>Product</th>
             <th>Quantity</th>
@@ -63,8 +65,10 @@ else
         <tbody>
         @foreach (var salesLog in _salesLogs)
         {
+            var firstMonday = salesLog.DayOfSale.DateTime.GetFirstMondayOfYear().DayOfYear;
             <tr>
                 <td>@salesLog.DayOfSale.ToLocalTime().ToString("d")</td>
+                <td>@((int)Math.Floor((double)(salesLog.DayOfSale.DayOfYear - firstMonday) / 7) + 2)</td>
                 <td>@salesLog.SalesAgent</td>
                 <td>@salesLog.Product</td>
                 <td>@salesLog.Quantity</td>
@@ -119,8 +123,8 @@ else
     {
         _model.SalesAgentId = Guid.Empty;
         _model.ProductId = Guid.Empty;
-        _model.Quantity = default;
-        _model.Price = default;
+        _model.Quantity = 0;
+        _model.Price = 0m;
         _model.DateOfSale = DateTimeOffset.Now;
     }
 
