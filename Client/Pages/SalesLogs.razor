@@ -4,7 +4,7 @@
 
 <h3>Sales Logs</h3>
 
-@if (_salesLogs == null)
+@if (_salesLogs is null || _salesAgents is null || _products is null)
 {
     <p>
         <em>Loading...</em>
@@ -12,41 +12,43 @@
 }
 else
 {
-    <div>
+    <EditForm Model="@_model" OnValidSubmit="@HandleValidSubmit">
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
         <label>
             Agent:
-            <select @bind="@_salesAgentId">
+            <InputSelect @bind-Value="@_model.SalesAgentId">
                 <option value="">--choose agent--</option>
-                @foreach (var agent in _salesAgents!)
+                @foreach (var saleAgent in _salesAgents)
                 {
-                    <option value="@agent.SalesAgentId">@agent.FullName</option>
+                    <option value="@saleAgent.SalesAgentId">@saleAgent.FullName</option>
                 }
-            </select>
+            </InputSelect>
         </label>
         <label>
             Product:
-            <select @bind="@_productId">
-                <option value="">--pick product--</option>
-                @foreach (var product in _products!)
+            <InputSelect @bind-Value="@_model.ProductId">
+                <option value="">--choose product--</option>
+                @foreach (var product in _products)
                 {
                     <option value="@product.ProductId">@product.Name (@product.Price)</option>
                 }
-            </select>
+            </InputSelect>
         </label>
         <label>
             Quantity:
-            <input @bind="@_quantity"/>
+            <InputNumber TValue="int" ValueChanged="QuantityChanged" ValueExpression="() => _model.Quantity"/>
         </label>
         <label>
             Total Price:
-            <input @bind="@_totalPrice"/>
+            <InputNumber @bind-Value="@_model.Price"/>
         </label>
         <label>
             Date of Sale:
-            <input @bind="@_dateOfSale" type="date"/>
+            <InputDate @bind-Value="@_model.DateOfSale"/>
         </label>
-        <button @onclick="AddLog">Add Log</button>
-    </div>
+        <button type="submit">Add log</button>
+    </EditForm>
 
     <table class="table">
         <thead>
@@ -62,11 +64,11 @@ else
         @foreach (var salesLog in _salesLogs)
         {
             <tr>
-                <td>@salesLog.DayOfSale.ToLocalTime()</td>
+                <td>@salesLog.DayOfSale.ToLocalTime().ToString("d")</td>
                 <td>@salesLog.SalesAgent</td>
                 <td>@salesLog.Product</td>
                 <td>@salesLog.Quantity</td>
-                <td>@salesLog.Price</td>
+                <td class="text-end">@salesLog.Price.ToString("C2")</td>
             </tr>
         }
         </tbody>
@@ -74,38 +76,59 @@ else
 }
 
 @code {
-    private Guid _productId;
-    private Guid _salesAgentId;
     private IList<ProductDto>? _products;
     private IList<SalesAgentDto>? _salesAgents;
     private IList<SalesLogDto>? _salesLogs;
-    private int _quantity;
-    private decimal _totalPrice;
-    private DateTime _dateOfSale;
+
+    private readonly AddSalesLogCommand _model = new();
 
     protected override async Task OnInitializedAsync()
     {
-        _dateOfSale = DateTime.Now;
+        await LoadProducts();
+        await LoadSalesLogs();
+        await LoadSalesAgents();
+    }
+
+    private async Task LoadProducts()
+    {
         _products = await HttpClient.SendAsync(new ProductsQuery());
+    }
+
+    private async Task LoadSalesLogs()
+    {
         _salesLogs = await HttpClient.SendAsync(new SalesLogQuery());
+    }
+
+    private async Task LoadSalesAgents()
+    {
         _salesAgents = await HttpClient.SendAsync(new SalesAgentsQuery());
     }
 
-    private async Task AddLog(MouseEventArgs arg)
+    private async Task HandleValidSubmit(EditContext arg)
     {
-    // add log
-        await HttpClient.SendAsync(new AddLogCommand(_productId, _salesAgentId, _quantity, _totalPrice, _dateOfSale));
-    // clear form
-        _productId = Guid.Empty;
-        _salesAgentId = Guid.Empty;
-        _quantity = 0;
-        _totalPrice = 0;
-        _dateOfSale = DateTime.Now;
-    // refresh log data
-        _salesLogs = await HttpClient.SendAsync(new SalesLogQuery());
-    // notify ui
+        await HttpClient.SendAsync(_model);
+
+        await LoadSalesLogs();
+
+        ResetModel();
+
         StateHasChanged();
     }
 
+    private void ResetModel()
+    {
+        _model.SalesAgentId = Guid.Empty;
+        _model.ProductId = Guid.Empty;
+        _model.Quantity = default;
+        _model.Price = default;
+        _model.DateOfSale = DateTimeOffset.Now;
+    }
+
+    private void QuantityChanged(int quantity)
+    {
+        _model.Quantity = quantity;
+        if (_model.ProductId != Guid.Empty)
+            _model.Price = quantity * _products!.Where(e => e.ProductId == _model.ProductId).Select(e => e.Price).FirstOrDefault();
+    }
 
 }

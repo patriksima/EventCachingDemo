@@ -4,23 +4,23 @@ using MediatR;
 
 namespace EventCachingDemo.Server.Handlers.Commands;
 
-public class AddLogCommandHandler : IRequestHandler<AddLogCommand>
+public class AddSalesLogCommandHandler : IRequestHandler<AddSalesLogCommand>
 {
     private readonly MyContext _dbContext;
 
-    public AddLogCommandHandler(MyContext dbContext)
+    public AddSalesLogCommandHandler(MyContext dbContext)
     {
         _dbContext = dbContext;
     }
     
-    public async Task<Unit> Handle(AddLogCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(AddSalesLogCommand request, CancellationToken cancellationToken)
     {
         await _dbContext.SalesLogs.AddAsync(new SalesLog
         {
             ProductId = request.ProductId,
             SalesAgentId = request.SalesAgentId,
             Quantity = request.Quantity,
-            Price = request.TotalPrice,
+            Price = request.Price,
             DayOfSale = request.DateOfSale
         }, cancellationToken);
         
