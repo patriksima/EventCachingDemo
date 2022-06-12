@@ -8,13 +8,14 @@ public class Report
     public Guid ReportId { get; set; }
     public int Year { get; set; }
     public int Week { get; set; }
-    public string Agent { get; set; }
+    public string Agent { get; set; } = default!;
     public int TotalProducts { get; set; }
-    [Precision(14, 2)] public decimal TotalPrice { get; set; }
+    [Precision(14, 2)]
+    public decimal TotalPrice { get; set; }
 
-    public string MostSoldProduct { get; set; }
+    public string MostSoldProduct { get; set; } = default!;
 
     // reference to agent
     public Guid SalesAgentId { get; set; }
-    public SalesAgent SalesAgent { get; set; }
+    public SalesAgent SalesAgent { get; set; } = default!;
 }

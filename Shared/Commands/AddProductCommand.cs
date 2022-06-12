@@ -5,6 +5,13 @@ namespace EventCachingDemo.Shared.Commands;
 
 public class AddProductCommand : IRequest
 {
+    public AddProductCommand()
+    {
+        Name = string.Empty;
+        Description = string.Empty;
+        Price = 0;
+    }
+
     [Required]
     [StringLength(50)]
     public string Name { get; set; }

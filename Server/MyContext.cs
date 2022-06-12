@@ -9,9 +9,9 @@ public class MyContext : DbContext
     {
     }
 
-    public DbSet<SalesDepartment> SalesDepartments { get; set; }
-    public DbSet<SalesAgent> SalesAgents { get; set; }
-    public DbSet<Product> Products { get; set; }
-    public DbSet<SalesLog> SalesLogs { get; set; }
-    public DbSet<Report> Reports { get; set; }
+    public DbSet<SalesDepartment> SalesDepartments => Set<SalesDepartment>();
+    public DbSet<SalesAgent> SalesAgents => Set<SalesAgent>();
+    public DbSet<Product> Products => Set<Product>();
+    public DbSet<SalesLog> SalesLogs => Set<SalesLog>();
+    public DbSet<Report> Reports => Set<Report>();
 }
