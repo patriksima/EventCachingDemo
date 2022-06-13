@@ -1,5 +1,6 @@
 using System.Reflection;
 using EventCachingDemo.Server;
+using EventCachingDemo.Server.Helpers;
 using EventCachingDemo.Server.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,9 @@ builder.Services.AddControllersWithViews(options =>
 
 // Build app
 var app = builder.Build();
+
+// apply migrations
+app.ApplyMigrations();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
