@@ -1,4 +1,7 @@
-﻿using MediatR;
+﻿using EventCachingDemo.Client.Pages;
+using EventCachingDemo.Shared.Events;
+using EventCachingDemo.Shared.Queries;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventCachingDemo.Server.Controllers;
@@ -17,6 +20,12 @@ public class MessageController : ControllerBase
     [HttpPost]
     public async Task<ActionResult> Post(IBaseRequest request)
     {
-        return new JsonResult(await _mediator.Send(request));
+        var result = await _mediator.Send(request);
+        if (request is not HistoryQuery)
+        {
+            await _mediator.Publish(new HistoryChangedEvent(request));
+        }
+
+        return new JsonResult(result);
     }
 }

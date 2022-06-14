@@ -16,6 +16,7 @@ public class MyContext : DbContext
     public DbSet<Product> Products => Set<Product>();
     public DbSet<SalesLog> SalesLogs => Set<SalesLog>();
     public DbSet<Report> Reports => Set<Report>();
+    public DbSet<History> History => Set<History>();
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

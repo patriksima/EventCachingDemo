@@ -1,0 +1,48 @@
+﻿@page "/History"
+@using EventCachingDemo.Shared.Queries
+
+<h3>History</h3>
+
+@if (_history is null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Request</th>
+            <th>Params</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var history in _history)
+        {
+            <tr>
+                <td>@history.Created.ToLocalTime().ToString("d")</td>
+                <td>@history.RequestName</td>
+                <td>@history.RequestBody</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IList<HistoryDto>? _history;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadHistory();
+    }
+
+    private async Task LoadHistory()
+    {
+        _history = await HttpClient.SendAsync(new HistoryQuery());
+    }
+
+}
