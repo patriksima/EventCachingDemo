@@ -1,5 +1,6 @@
 ﻿@page "/WeeklyReport"
 @using EventCachingDemo.Shared.Queries
+@using EventCachingDemo.Shared.Commands
 
 <h3>Weekly Report</h3>
 
@@ -25,9 +26,12 @@ else
         <tbody>
         @foreach (var report in _reports)
         {
+            var salesLogLink = $"/{nameof(SalesLogs)}/{report.Week}";
             <tr>
                 <td>@report.Year</td>
-                <td>@report.Week</td>
+                <td>
+                    <NavLink href="@salesLogLink">@report.Week</NavLink>
+                </td>
                 <td>@report.Agent</td>
                 <td>@report.MostSoldProduct</td>
                 <td>@report.TotalProducts</td>
@@ -36,14 +40,28 @@ else
         }
         </tbody>
     </table>
+    <button @onclick="PurgeReport">Purge report</button>
 }
 
 @code {
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadReports();
+    }
+
+    private async Task LoadReports()
+    {
         _reports = await HttpClient.SendAsync(new WeeklyReportQuery());
     }
 
     private IList<ReportDto>? _reports;
+
+    private async Task PurgeReport(MouseEventArgs arg)
+    {
+        await HttpClient.SendAsync(new PurgeReportCommand());
+        _reports = new List<ReportDto>();
+        StateHasChanged();
+    }
+
 }

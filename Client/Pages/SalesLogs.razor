@@ -1,9 +1,14 @@
-﻿@page "/SalesLogs"
+﻿@page "/SalesLogs/{Week:int?}"
 @using EventCachingDemo.Shared.Queries
 @using EventCachingDemo.Shared.Commands
 @using EventCachingDemo.Shared.Helpers
 
 <h3>Sales Logs</h3>
+@if (Week is not null)
+{
+    var filterTitle = $"Selected week: {Week}";
+    <h5>@filterTitle</h5>
+}
 
 @if (_salesLogs is null || _salesAgents is null || _products is null)
 {
@@ -77,12 +82,16 @@ else
         }
         </tbody>
     </table>
+    <button @onclick="PurgeLog">Purge log</button>
 }
 
 @code {
     private IList<ProductDto>? _products;
     private IList<SalesAgentDto>? _salesAgents;
     private IList<SalesLogDto>? _salesLogs;
+    
+    [Parameter]
+    public int? Week { get; set; }
 
     private readonly AddSalesLogCommand _model = new();
 
@@ -133,6 +142,13 @@ else
         _model.Quantity = quantity;
         if (_model.ProductId != Guid.Empty)
             _model.Price = quantity * _products!.Where(e => e.ProductId == _model.ProductId).Select(e => e.Price).FirstOrDefault();
+    }
+    
+    private async Task PurgeLog(MouseEventArgs arg)
+    {
+        await HttpClient.SendAsync(new PurgeLogCommand());
+        _salesLogs = new List<SalesLogDto>();
+        StateHasChanged();
     }
 
 }
