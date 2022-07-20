@@ -1,4 +1,5 @@
 ﻿using EventCachingDemo.Server.Models;
+using EventCachingDemo.Shared.Commands;
 using EventCachingDemo.Shared.Events;
 using EventCachingDemo.Shared.Helpers;
 using MediatR;
@@ -19,9 +20,7 @@ public class SalesLogAddedEventHandler : INotificationHandler<SalesLogAddedEvent
     {
         var request = notification.Request;
 
-        var firstMonday = DateTime.Now.GetFirstMondayOfYear().DayOfYear;
-
-        var requestWeek = (int)Math.Floor((double)(request.DateOfSale.DayOfYear - firstMonday) / 7) + 2;
+        var requestWeek = request.DateOfSale.GetWeek();
         var requestYear = request.DateOfSale.Year;
 
         var reportWeek = await _dbContext
@@ -29,8 +28,8 @@ public class SalesLogAddedEventHandler : INotificationHandler<SalesLogAddedEvent
             .Where(e => e.Week == requestWeek && e.Year == requestYear)
             .FirstOrDefaultAsync(cancellationToken);
 
-        var requestAgent = _dbContext.SalesAgents.FirstOrDefault(e => e.SalesAgentId == request.SalesAgentId);
-        var requestProduct = _dbContext.Products.FirstOrDefault(e => e.ProductId == request.ProductId);
+        var requestAgent = _dbContext.SalesAgents.SingleOrDefault(e => e.SalesAgentId == request.SalesAgentId);
+        var requestProduct = _dbContext.Products.SingleOrDefault(e => e.ProductId == request.ProductId);
 
         if (requestAgent is null)
         {
@@ -45,19 +44,7 @@ public class SalesLogAddedEventHandler : INotificationHandler<SalesLogAddedEvent
         // report for this week does not exist, so create the first one!
         if (reportWeek is null)
         {
-            var entity = new Report
-            {
-                Year = requestYear,
-                Week = requestWeek,
-                Agent = requestAgent.FirstName + " " + requestAgent.LastName,
-                SalesAgentId = request.SalesAgentId,
-                MostSoldProduct = requestProduct.Name,
-                TotalPrice = request.Price,
-                TotalProducts = request.Quantity
-            };
-
-            await _dbContext.Reports.AddAsync(entity, cancellationToken);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            await CreateReport(request, requestWeek, requestYear, requestAgent, requestProduct, cancellationToken);
             return;
         }
 
@@ -65,20 +52,38 @@ public class SalesLogAddedEventHandler : INotificationHandler<SalesLogAddedEvent
         if (reportWeek.TotalPrice < request.Price)
         {
             // update report with new max
-            reportWeek.Agent = requestAgent.FirstName + " " + requestAgent.LastName;
-            reportWeek.SalesAgentId = requestAgent.SalesAgentId;
-            reportWeek.TotalPrice = request.Price;
-            reportWeek.TotalProducts = request.Quantity;
-            reportWeek.MostSoldProduct = requestProduct.Name;
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            await UpdateReport(reportWeek, requestAgent.FirstName + " " + requestAgent.LastName,
+                requestAgent.SalesAgentId, requestProduct.Name, request.Quantity, request.Price, cancellationToken);
             return;
         }
 
-        // get sales log for week
+        // find winner
+        var winner = await GetBestSalesmanOfWeek(requestWeek, requestYear, cancellationToken);
+
+        // update week report
+        await UpdateReport(reportWeek, winner.Agent, winner.AgentId, winner.Product, winner.TotalProducts,
+            winner.TotalPrice,
+            cancellationToken);
+    }
+
+    /// <summary>
+    ///     Finds the best salesman of the week by total amount sold, and by number of units sold
+    /// </summary>
+    /// <param name="requestWeek"></param>
+    /// <param name="requestYear"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    private async Task<WinnerDto> GetBestSalesmanOfWeek(int requestWeek, int requestYear,
+        CancellationToken cancellationToken)
+    {
+        var firstMonday = DateTime.Now.GetFirstMondayOfYear().DayOfYear;
+
         var salesLog = await _dbContext
             .SalesLogs
-            .Where(e => requestWeek == (int)Math.Floor((double)(e.DayOfSale.DayOfYear - firstMonday) / 7) + 2
-                        && requestYear == e.DayOfSale.Year)
+            .Where(e =>
+                requestWeek ==
+                (int)Math.Floor((double)(e.DayOfSale.DayOfYear - firstMonday) / 7) + 2 // TODO: expression
+                && requestYear == e.DayOfSale.Year)
             .Select(e => new
             {
                 AgentId = e.SalesAgentId,
@@ -92,11 +97,11 @@ public class SalesLogAddedEventHandler : INotificationHandler<SalesLogAddedEvent
         // pick winner and save
         var winner = salesLog
             .GroupBy(e => new { e.AgentId, e.Agent, e.Product })
-            .Select(e => new
+            .Select(e => new WinnerDto
             {
-                e.Key.AgentId,
-                e.Key.Agent,
-                e.Key.Product,
+                AgentId = e.Key.AgentId,
+                Agent = e.Key.Agent,
+                Product = e.Key.Product,
                 TotalPrice = e.Sum(x => x.Price),
                 TotalProducts = e.Sum(x => x.Quantity)
             })
@@ -104,14 +109,66 @@ public class SalesLogAddedEventHandler : INotificationHandler<SalesLogAddedEvent
             .ThenByDescending(e => e.TotalProducts)
             .First();
 
+        return winner;
+    }
+
+    /// <summary>
+    ///     Update report for the week/year
+    /// </summary>
+    /// <param name="report"></param>
+    /// <param name="agent"></param>
+    /// <param name="agentId"></param>
+    /// <param name="mostSoldProduct"></param>
+    /// <param name="totalProducts"></param>
+    /// <param name="totalPrice"></param>
+    /// <param name="cancellationToken"></param>
+    private async Task UpdateReport(Report report, string agent, Guid agentId, string mostSoldProduct,
+        int totalProducts, decimal totalPrice, CancellationToken cancellationToken)
+    {
         // update week report
-        reportWeek.Agent = winner.Agent;
-        reportWeek.SalesAgentId = winner.AgentId;
-        reportWeek.MostSoldProduct = winner.Product;
-        reportWeek.TotalProducts = winner.TotalProducts;
-        reportWeek.TotalPrice = winner.TotalPrice;
+        report.Agent = agent;
+        report.SalesAgentId = agentId;
+        report.MostSoldProduct = mostSoldProduct;
+        report.TotalProducts = totalProducts;
+        report.TotalPrice = totalPrice;
 
         // save changes
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    /// <summary>
+    ///     Create new report for the week/year
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="requestWeek"></param>
+    /// <param name="requestYear"></param>
+    /// <param name="requestAgent"></param>
+    /// <param name="requestProduct"></param>
+    /// <param name="cancellationToken"></param>
+    private async Task CreateReport(AddSalesLogCommand request, int requestWeek, int requestYear,
+        SalesAgent requestAgent, Product requestProduct, CancellationToken cancellationToken)
+    {
+        var entity = new Report
+        {
+            Year = requestYear,
+            Week = requestWeek,
+            Agent = requestAgent.FirstName + " " + requestAgent.LastName,
+            SalesAgentId = request.SalesAgentId,
+            MostSoldProduct = requestProduct.Name,
+            TotalPrice = request.Price,
+            TotalProducts = request.Quantity
+        };
+
+        await _dbContext.Reports.AddAsync(entity, cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+}
+
+internal record WinnerDto
+{
+    public Guid AgentId { get; init; }
+    public string Agent { get; init; } = default!;
+    public string Product { get; init; } = default!;
+    public decimal TotalPrice { get; init; }
+    public int TotalProducts { get; init; }
 }
