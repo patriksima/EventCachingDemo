@@ -1,7 +1,7 @@
 ﻿@page "/SalesLogs/{Week:int?}"
+@using EventCachingDemo.Shared.Helpers
 @using EventCachingDemo.Shared.Queries
 @using EventCachingDemo.Shared.Commands
-@using EventCachingDemo.Shared.Helpers
 
 <h3>Sales Logs</h3>
 @if (Week is not null)
@@ -89,7 +89,7 @@ else
     private IList<ProductDto>? _products;
     private IList<SalesAgentDto>? _salesAgents;
     private IList<SalesLogDto>? _salesLogs;
-    
+
     [Parameter]
     public int? Week { get; set; }
 
@@ -143,7 +143,7 @@ else
         if (_model.ProductId != Guid.Empty)
             _model.Price = quantity * _products!.Where(e => e.ProductId == _model.ProductId).Select(e => e.Price).FirstOrDefault();
     }
-    
+
     private async Task PurgeLog(MouseEventArgs arg)
     {
         await HttpClient.SendAsync(new PurgeLogCommand());

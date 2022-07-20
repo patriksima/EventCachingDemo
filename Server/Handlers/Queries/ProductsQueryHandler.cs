@@ -17,7 +17,7 @@ public class ProductsQueryHandler : IRequestHandler<ProductsQuery, IList<Product
     public async Task<IList<ProductDto>> Handle(ProductsQuery request, CancellationToken cancellationToken)
     {
         return await _dbContext.Products
-            .Select(e => new ProductDto()
+            .Select(e => new ProductDto
             {
                 ProductId = e.ProductId,
                 Name = e.Name,
@@ -26,6 +26,6 @@ public class ProductsQueryHandler : IRequestHandler<ProductsQuery, IList<Product
             })
             .AsNoTracking()
             .OrderBy(e => e.Name)
-            .ToListAsync(cancellationToken: cancellationToken);
+            .ToListAsync(cancellationToken);
     }
 }

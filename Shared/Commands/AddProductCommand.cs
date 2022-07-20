@@ -12,13 +12,9 @@ public class AddProductCommand : IRequest
         Price = 0;
     }
 
-    [Required]
-    [StringLength(50)]
-    public string Name { get; set; }
-    [Required]
-    [StringLength(250)]
-    public string Description { get; set; }
-    [Required]
-    [Range(0, 99999.99)]
-    public decimal Price { get; set; }
+    [Required] [StringLength(50)] public string Name { get; set; }
+
+    [Required] [StringLength(250)] public string Description { get; set; }
+
+    [Required] [Range(0, 99999.99)] public decimal Price { get; set; }
 }

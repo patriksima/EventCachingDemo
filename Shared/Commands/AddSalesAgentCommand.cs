@@ -12,12 +12,9 @@ public class AddSalesAgentCommand : IRequest
         SalesDepartmentId = Guid.Empty;
     }
 
-    [Required]
-    [StringLength(50)]
-    public string FirstName { get; set; }
-    [Required]
-    [StringLength(50)]
-    public string LastName { get; set; }
-    [Required]
-    public Guid SalesDepartmentId { get; set; }
+    [Required] [StringLength(50)] public string FirstName { get; set; }
+
+    [Required] [StringLength(50)] public string LastName { get; set; }
+
+    [Required] public Guid SalesDepartmentId { get; set; }
 }

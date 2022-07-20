@@ -27,7 +27,7 @@ public class SalesLogAddedEventHandler : INotificationHandler<SalesLogAddedEvent
         var reportWeek = await _dbContext
             .Reports
             .Where(e => e.Week == requestWeek && e.Year == requestYear)
-            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+            .FirstOrDefaultAsync(cancellationToken);
 
         var requestAgent = _dbContext.SalesAgents.FirstOrDefault(e => e.SalesAgentId == request.SalesAgentId);
         var requestProduct = _dbContext.Products.FirstOrDefault(e => e.ProductId == request.ProductId);
@@ -78,16 +78,16 @@ public class SalesLogAddedEventHandler : INotificationHandler<SalesLogAddedEvent
         var salesLog = await _dbContext
             .SalesLogs
             .Where(e => requestWeek == (int)Math.Floor((double)(e.DayOfSale.DayOfYear - firstMonday) / 7) + 2
-                            && requestYear == e.DayOfSale.Year)
+                        && requestYear == e.DayOfSale.Year)
             .Select(e => new
             {
                 AgentId = e.SalesAgentId,
                 Agent = e.SalesAgent.FirstName + " " + e.SalesAgent.LastName,
                 Product = e.Product.Name,
-                Quantity = e.Quantity,
-                Price = e.Price
+                e.Quantity,
+                e.Price
             })
-            .ToListAsync(cancellationToken: cancellationToken);
+            .ToListAsync(cancellationToken);
 
         // pick winner and save
         var winner = salesLog

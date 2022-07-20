@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using System.Text;
+﻿using System.Text;
 using EventCachingDemo.Shared.Queries;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +19,7 @@ public class HistoryQueryHandler : IRequestHandler<HistoryQuery, IList<HistoryDt
     public async Task<IList<HistoryDto>> Handle(HistoryQuery request, CancellationToken cancellationToken)
     {
         var results = new List<HistoryDto>();
-        
+
         var history = await _dbContext.History
             .Select(e => new HistoryDto
             {
@@ -31,7 +30,7 @@ public class HistoryQueryHandler : IRequestHandler<HistoryQuery, IList<HistoryDt
             })
             .AsNoTracking()
             .OrderByDescending(e => e.Created)
-            .ToListAsync(cancellationToken: cancellationToken);
+            .ToListAsync(cancellationToken);
 
         foreach (var dto in history)
         {
@@ -41,7 +40,7 @@ public class HistoryQueryHandler : IRequestHandler<HistoryQuery, IList<HistoryDt
                 (IBaseRequest)JsonConvert.DeserializeObject(dto.RequestBody, Type.GetType(dto.RequestName)!)!;
 
             var properties = dtoRequest.GetType().GetProperties();
-            
+
             foreach (var property in properties)
             {
                 dtoParams.Append(property.Name);
@@ -49,7 +48,7 @@ public class HistoryQueryHandler : IRequestHandler<HistoryQuery, IList<HistoryDt
                 dtoParams.Append(property.GetValue(dtoRequest));
                 dtoParams.Append("; ");
             }
-            
+
             results.Add(new HistoryDto
             {
                 HistoryId = dto.HistoryId,

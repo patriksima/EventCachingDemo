@@ -29,6 +29,6 @@ public class SalesDepartmentsQueryHandler : IRequestHandler<SalesDepartmentsQuer
             })
             .AsNoTracking()
             .OrderBy(e => e.Name)
-            .ToListAsync(cancellationToken: cancellationToken);
+            .ToListAsync(cancellationToken);
     }
 }

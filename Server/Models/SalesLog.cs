@@ -6,8 +6,8 @@ public class SalesLog
 {
     public Guid SalesLogId { get; set; }
     public int Quantity { get; set; }
-    [Precision(14, 2)]
-    public decimal Price { get; set; }
+
+    [Precision(14, 2)] public decimal Price { get; set; }
 
     public DateTimeOffset DayOfSale { get; set; }
 

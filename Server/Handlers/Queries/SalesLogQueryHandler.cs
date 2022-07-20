@@ -27,6 +27,6 @@ public class SalesLogQueryHandler : IRequestHandler<SalesLogQuery, IList<SalesLo
             })
             .AsNoTracking()
             .OrderByDescending(e => e.DayOfSale)
-            .ToListAsync(cancellationToken: cancellationToken);
+            .ToListAsync(cancellationToken);
     }
 }

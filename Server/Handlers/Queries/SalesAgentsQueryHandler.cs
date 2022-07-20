@@ -17,7 +17,7 @@ public class SalesAgentsQueryHandler : IRequestHandler<SalesAgentsQuery, IList<S
     public async Task<IList<SalesAgentDto>> Handle(SalesAgentsQuery request, CancellationToken cancellationToken)
     {
         return await _dbContext.SalesAgents
-            .Select(e => new SalesAgentDto()
+            .Select(e => new SalesAgentDto
             {
                 SalesAgentId = e.SalesAgentId,
                 FirstName = e.FirstName,
@@ -27,6 +27,6 @@ public class SalesAgentsQueryHandler : IRequestHandler<SalesAgentsQuery, IList<S
             .AsNoTracking()
             .OrderBy(e => e.LastName)
             .ThenBy(e => e.FirstName)
-            .ToListAsync(cancellationToken: cancellationToken);
+            .ToListAsync(cancellationToken);
     }
 }

@@ -1,5 +1,4 @@
-﻿using EventCachingDemo.Client.Pages;
-using EventCachingDemo.Shared.Events;
+﻿using EventCachingDemo.Shared.Events;
 using EventCachingDemo.Shared.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

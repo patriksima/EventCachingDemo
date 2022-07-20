@@ -4,7 +4,6 @@ namespace EventCachingDemo.Shared.Queries;
 
 public class SalesLogQuery : IRequest<IList<SalesLogDto>>
 {
-    
 }
 
 public record SalesLogDto

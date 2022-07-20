@@ -17,7 +17,7 @@ public class PurgeLogCommandHandler : IRequestHandler<PurgeLogCommand>
     public async Task<Unit> Handle(PurgeLogCommand request, CancellationToken cancellationToken)
     {
         await _dbContext.Database.ExecuteSqlRawAsync($"TRUNCATE TABLE [{nameof(SalesLog)}s]",
-            cancellationToken: cancellationToken);
+            cancellationToken);
 
         return Unit.Value;
     }

@@ -15,7 +15,7 @@ public class AddSalesLogCommandHandler : IRequestHandler<AddSalesLogCommand>
         _dbContext = dbContext;
         _mediator = mediator;
     }
-    
+
     public async Task<Unit> Handle(AddSalesLogCommand request, CancellationToken cancellationToken)
     {
         await _dbContext.SalesLogs.AddAsync(new SalesLog
@@ -26,14 +26,14 @@ public class AddSalesLogCommandHandler : IRequestHandler<AddSalesLogCommand>
             Price = request.Price,
             DayOfSale = request.DateOfSale
         }, cancellationToken);
-        
+
         var written = await _dbContext.SaveChangesAsync(cancellationToken);
 
         if (written > 0)
         {
             await _mediator.Publish(new SalesLogAddedEvent(request), cancellationToken);
         }
-        
+
         return Unit.Value;
     }
 }

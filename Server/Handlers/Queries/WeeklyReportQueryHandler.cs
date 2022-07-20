@@ -1,6 +1,4 @@
-﻿using EventCachingDemo.Server.Models;
-using EventCachingDemo.Shared.Helpers;
-using EventCachingDemo.Shared.Queries;
+﻿using EventCachingDemo.Shared.Queries;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,6 +31,6 @@ public class WeeklyReportQueryHandler : IRequestHandler<WeeklyReportQuery, IList
             .ThenByDescending(e => e.Week)
             .ThenByDescending(e => e.TotalPrice)
             .ThenByDescending(e => e.TotalProducts)
-            .ToListAsync(cancellationToken: cancellationToken);
+            .ToListAsync(cancellationToken);
     }
 }

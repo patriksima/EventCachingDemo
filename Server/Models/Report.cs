@@ -10,8 +10,8 @@ public class Report
     public int Week { get; set; }
     public string Agent { get; set; } = default!;
     public int TotalProducts { get; set; }
-    [Precision(14, 2)]
-    public decimal TotalPrice { get; set; }
+
+    [Precision(14, 2)] public decimal TotalPrice { get; set; }
 
     public string MostSoldProduct { get; set; } = default!;
 

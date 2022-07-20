@@ -17,7 +17,7 @@ public class PurgeReportCommandHandler : IRequestHandler<PurgeReportCommand>
     public async Task<Unit> Handle(PurgeReportCommand request, CancellationToken cancellationToken)
     {
         await _dbContext.Database.ExecuteSqlRawAsync($"TRUNCATE TABLE [{nameof(Report)}s]",
-            cancellationToken: cancellationToken);
+            cancellationToken);
 
         return Unit.Value;
     }
