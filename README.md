@@ -1,13 +1,13 @@
-# PoC of incremental build of complex report
+# PoC: Incremental building of a complex report
 
-Incremental reporting using CQRS, MediatR and events
+Building report slice-by-slice using CQRS, MediatR and events
 
-A common reporting approach:
-- A nightly job that runs a complex query and kills the database
-- a report is updated only once a day at night
+Common approach to reporting:
+- a nightly task runs a complex query and kills the database :)
+- report is updated only once a day
 
-The disadvantages are obvious. Large database load, potential deadlocks. Report is only updated once a day.
+Disadvantages are obvious. Heavy database load, potential deadlocks. Report is updated only once a day.
 
-I've tried a different approach. Build a report incrementally each time relevant data changes using events using CQRS and MediatR.
+I tried a different approach. Build the report incrementally whenever relevant data changes using events, CQRS and MediatR.
 
-The advantage is low database load, the report is always up to date. The disadvantage is higher code complexity and programmer requirements. Some reports may not be solvable this way.
+The advantage is low database load, the report is always up to date. The disadvantage is higher code complexity and programmer requirements. Some reports may not be solvable in this way.

@@ -57,7 +57,7 @@ public class SalesLogAddedEventHandler : INotificationHandler<SalesLogAddedEvent
             return;
         }
 
-        // find winner
+        // the worst case scenario - find the winner
         var winner = await GetBestSalesmanOfWeek(requestWeek, requestYear, cancellationToken);
 
         // update week report
