@@ -20,6 +20,8 @@ public class MessageController : ControllerBase
     public async Task<ActionResult> Post(IBaseRequest request)
     {
         var result = await _mediator.Send(request);
+
+        // collect and store the request
         if (request is not HistoryQuery)
         {
             await _mediator.Publish(new HistoryChangedEvent(request));

@@ -1,4 +1,5 @@
-﻿using EventCachingDemo.Shared;
+﻿using Ardalis.GuardClauses;
+using EventCachingDemo.Shared;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Newtonsoft.Json;
 
@@ -8,10 +9,7 @@ public class MessageBinder : IModelBinder
 {
     public async Task BindModelAsync(ModelBindingContext bindingContext)
     {
-        if (bindingContext == null)
-        {
-            throw new ArgumentNullException(nameof(bindingContext));
-        }
+        Guard.Against.Null(bindingContext, nameof(bindingContext));
 
         using var reader = new StreamReader(bindingContext.HttpContext.Request.Body);
         var json = await reader.ReadToEndAsync();

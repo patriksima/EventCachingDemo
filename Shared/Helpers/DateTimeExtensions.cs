@@ -13,7 +13,7 @@ public static class DateTimeExtensions
 
         return dt;
     }
-    
+
     public static int GetFirstMondayOfYear(this DateTimeOffset dateTime)
     {
         var dt = new DateTime(dateTime.Year, 1, 1);

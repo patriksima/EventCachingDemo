@@ -18,10 +18,7 @@ builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
 // Add sql database
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnectionString");
 
-builder.Services.AddDbContext<MyContext>((_, optionsBuilder) =>
-{
-    optionsBuilder.UseSqlServer(connectionString);
-});
+builder.Services.AddDbContext<MyContext>((_, optionsBuilder) => { optionsBuilder.UseSqlServer(connectionString); });
 
 // Add services to the container.
 builder.Services.AddControllersWithViews(options =>

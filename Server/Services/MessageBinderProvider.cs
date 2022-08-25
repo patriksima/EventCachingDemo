@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Ardalis.GuardClauses;
+using MediatR;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 
@@ -8,16 +9,11 @@ public class MessageBinderProvider : IModelBinderProvider
 {
     public IModelBinder? GetBinder(ModelBinderProviderContext context)
     {
-        if (context == null)
-        {
-            throw new ArgumentNullException(nameof(context));
-        }
+        Guard.Against.Null(context, nameof(context));
+        Guard.Against.Null(context.Metadata, nameof(context.Metadata));
 
-        if (context.Metadata.ModelType == typeof(IBaseRequest))
-        {
-            return new BinderTypeModelBinder(typeof(MessageBinder));
-        }
-
-        return null;
+        return context.Metadata.ModelType == typeof(IBaseRequest)
+            ? new BinderTypeModelBinder(typeof(MessageBinder))
+            : null;
     }
 }

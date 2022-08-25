@@ -1,4 +1,5 @@
-﻿using EventCachingDemo.Server.Models;
+﻿using Ardalis.GuardClauses;
+using EventCachingDemo.Server.Models;
 using EventCachingDemo.Shared.Commands;
 using EventCachingDemo.Shared.Events;
 using EventCachingDemo.Shared.Helpers;
@@ -29,17 +30,10 @@ public class SalesLogAddedEventHandler : INotificationHandler<SalesLogAddedEvent
             .FirstOrDefaultAsync(cancellationToken);
 
         var requestAgent = _dbContext.SalesAgents.SingleOrDefault(e => e.SalesAgentId == request.SalesAgentId);
+        Guard.Against.Null(requestAgent, nameof(requestAgent), "Sales agent does not exist.");
+
         var requestProduct = _dbContext.Products.SingleOrDefault(e => e.ProductId == request.ProductId);
-
-        if (requestAgent is null)
-        {
-            throw new Exception("Sales agent does not exist.");
-        }
-
-        if (requestProduct is null)
-        {
-            throw new Exception("Product does not exist.");
-        }
+        Guard.Against.Null(requestProduct, nameof(requestProduct), "Product does not exist.");
 
         // report for this week does not exist, so create the first one!
         if (reportWeek is null)
